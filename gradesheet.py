@@ -102,6 +102,9 @@ def school_info_section():
         'address': address
     }
 
+
+
+
 def marks_section():
     """Collect subject marks."""
     st.subheader("Subject Marks")
@@ -131,34 +134,59 @@ def marks_section():
             valid_subjects += 1
             total_marks += mark
     
-    # Optional Subjects
-    for i, subject in enumerate(OPTIONAL_SUBJECTS[:2]):
-        cols = st.columns([3, 1])
-        with cols[0]:
-            selected = st.checkbox(f"{subject}", key=f"opt_subj_{i}")
-        with cols[1]:
-            if selected:
-                mark = st.number_input(
-                    "Marks",
-                    min_value=0.0,
-                    max_value=100.0,
-                    step=0.5,
-                    key=f"opt_marks_{i}",
-                    value=None,
-                    placeholder="Enter marks"
+    # Optional Subjects section with radio selection
+    st.markdown("### Optional Subjects")
+    want_optional = st.radio(
+        "Do you want to include optional subjects?",
+        options=["No", "Yes"],
+        horizontal=True,
+        key="want_optional"
+    )
+    
+    if want_optional == "Yes":
+        num_optional = st.radio(
+            "How many optional subjects?",
+            options=["1", "2"],
+            horizontal=True,
+            key="num_optional"
+        )
+        
+        # Convert string to integer for loop
+        num_subjects = int(num_optional)
+        
+        # Display optional subject inputs
+        for i in range(num_subjects):
+            cols = st.columns([3, 1])
+            with cols[0]:
+                subject = st.selectbox(
+                    f"Optional Subject {i+1}",
+                    options=OPTIONAL_SUBJECTS,
+                    key=f"opt_subj_{i}"
                 )
-                if mark is not None:
-                    grade, color = calculate_grade(mark)
-                    grades.append({
-                        'subject': subject,
-                        'mark': mark,
-                        'grade': grade,
-                        'color': color
-                    })
-                    valid_subjects += 1
-                    total_marks += mark
+            with cols[1]:
+                if subject:  # Only show marks input if subject is selected
+                    mark = st.number_input(
+                        "Marks",
+                        min_value=0.0,
+                        max_value=100.0,
+                        step=0.5,
+                        key=f"opt_marks_{i}",
+                        value=None,
+                        placeholder="Enter marks"
+                    )
+                    if mark is not None:
+                        grade, color = calculate_grade(mark)
+                        grades.append({
+                            'subject': subject,
+                            'mark': mark,
+                            'grade': grade,
+                            'color': color
+                        })
+                        valid_subjects += 1
+                        total_marks += mark
     
     return grades, valid_subjects, total_marks
+
 
 def validate_inputs(student, school, subjects):
     """Validate form inputs."""
